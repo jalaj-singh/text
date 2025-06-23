@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Report: B2B Plant Feasibility in Moradabad</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Green/Terracotta Accents -->
+    <!-- Application Structure Plan: A top-level tabbed navigation SPA. The core is the 'Opportunity Comparison' tab, which allows for a direct, side-by-side interactive analysis of the CBG vs. Biodegradable options across multiple facets (investment, profit, SWOT). This structure was chosen over a linear report format to empower the user to directly compare the most critical decision points, making the dense data more accessible and actionable. Other tabs provide essential context ('Why Moradabad?') and a clear, final 'Action Plan', guiding the user from analysis to decision. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Investment Breakdown -> Goal: Compare -> Viz: Stacked Bar Chart (Chart.js) -> Interaction: Toggle between business options -> Justification: Clearly visualizes the composition of the initial ₹5 Cr budget for each option.
+        - Report Info: Revenue Streams -> Goal: Compare -> Viz: Donut Chart (Chart.js) -> Interaction: Toggle -> Justification: Intuitively shows the contribution of different revenue sources (e.g., gas vs. manure) to the total potential income.
+        - Report Info: SWOT Analysis -> Goal: Compare -> Viz: Four-quadrant HTML/CSS grid -> Interaction: Toggle -> Justification: Organizes qualitative analysis into a standard, easily digestible strategic framework.
+        - Report Info: Implementation Steps -> Goal: Organize/Guide -> Viz: Vertical timeline with HTML/CSS -> Interaction: Hover for detail -> Justification: Presents the project plan as a clear, sequential process.
+        - Report Info: Moradabad Economic Data -> Goal: Inform -> Viz: Bar Chart (Chart.js) -> Interaction: Static -> Justification: Provides quick context on the local industrial landscape.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF6;
+            color: #3C3633;
+        }
+        .nav-button {
+            transition: all 0.3s ease;
+        }
+        .nav-button.active {
+            background-color: #739072;
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+        .nav-button:not(.active):hover {
+            background-color: #e0e0e0;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .comparison-button.active {
+            background-color: #739072;
+            color: white;
+            border-color: #739072;
+        }
+        .comparison-metric-button.active {
+            background-color: #E08E6D;
+            color: white;
+        }
+        .swot-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .swot-item {
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="app" class="container mx-auto p-4 md:p-8 max-w-7xl">
+        
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-[#3C3633] mb-2">B2B Plant Feasibility Analysis</h1>
+            <p class="text-lg text-[#7A736E]">An Interactive Decision Support Tool for a ₹5 Crore Investment in Moradabad, UP</p>
+        </header>
+
+        <nav class="flex justify-center flex-wrap gap-2 md:gap-4 mb-8">
+            <button data-target="overview" class="nav-button px-4 py-2 rounded-md font-medium text-sm md:text-base active">Overview & Recommendation</button>
+            <button data-target="comparison" class="nav-button px-4 py-2 rounded-md font-medium text-sm md:text-base">Opportunity Comparison</button>
+            <button data-target="context" class="nav-button px-4 py-2 rounded-md font-medium text-sm md:text-base">Why Moradabad?</button>
+            <button data-target="plan" class="nav-button px-4 py-2 rounded-md font-medium text-sm md:text-base">Action Plan</button>
+        </nav>
+
+        <main>
+            <!-- Overview Section -->
+            <section id="overview" class="content-section active">
+                <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm">
+                    <h2 class="text-2xl font-bold mb-4 text-[#739072]">Executive Summary</h2>
+                    <p class="mb-6 text-gray-700">This analysis assesses two primary B2B manufacturing opportunities near Moradabad, UP, for a ₹5 Crore budget: a small-scale Compressed Biogas (CBG) plant and a medium-scale Biodegradable Packaging facility. Both options leverage local resources and align with national sustainability goals. The goal of this interactive tool is to break down the key decision factors—investment, profitability, government support, and risks—to help you make an informed strategic choice.</p>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="border-l-4 border-[#E08E6D] p-4 bg-orange-50 rounded-r-lg">
+                            <h3 class="text-xl font-semibold mb-2">Key Findings</h3>
+                            <ul class="list-disc list-inside space-y-2 text-gray-600">
+                                <li>The **CBG Plant** offers robust profitability due to dual revenue streams (fuel and fertilizer) and guaranteed buyers via government schemes.</li>
+                                <li>**Biodegradable Packaging** taps into a rapidly growing market driven by the ban on single-use plastics.</li>
+                                <li>Uttar Pradesh's industrial policies provide substantial **financial incentives** that significantly de-risk both ventures.</li>
+                                <li>Moradabad's agricultural base provides a ready supply of **raw materials** for both potential industries.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-[#739072] text-white p-6 rounded-lg shadow-lg">
+                            <h3 class="text-xl font-bold mb-3">Primary Recommendation</h3>
+                            <p class="mb-4">Based on a comprehensive analysis of financial viability, market stability, and alignment with policy, the establishment of a **small-scale Compressed Biogas (CBG) Plant** is the most strategically sound investment.</p>
+                            <p class="font-semibold">Key Advantages:</p>
+                            <ul class="list-disc list-inside space-y-1 mt-2">
+                                <li>Strong government backing with subsidies.</li>
+                                <li>Guaranteed off-take agreements with Oil Marketing Companies.</li>
+                                <li>Strong circular economy model (waste-to-wealth).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Comparison Section -->
+            <section id="comparison" class="content-section">
+                 <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm">
+                    <h2 class="text-2xl font-bold mb-2 text-center text-[#739072]">Side-by-Side Opportunity Analysis</h2>
+                    <p class="text-center mb-6 text-gray-700">Select an option and a metric below to compare the two business opportunities. This allows for a direct evaluation of the factors most critical to your investment decision.</p>
+                    
+                    <div class="flex justify-center gap-4 mb-6">
+                        <button id="selectCBG" class="comparison-button flex-1 text-center font-semibold py-3 px-4 border-2 border-gray-300 rounded-lg transition-all duration-300 active">Compressed Biogas Plant</button>
+                        <button id="selectBio" class="comparison-button flex-1 text-center font-semibold py-3 px-4 border-2 border-gray-300 rounded-lg transition-all duration-300">Biodegradable Packaging</button>
+                    </div>
+
+                    <div class="flex justify-center flex-wrap gap-2 mb-8 bg-gray-100 p-2 rounded-lg">
+                        <button data-metric="investment" class="comparison-metric-button text-sm md:text-base px-4 py-2 rounded-md font-medium active">Investment Breakdown</button>
+                        <button data-metric="revenue" class="comparison-metric-button text-sm md:text-base px-4 py-2 rounded-md font-medium">Profitability & Revenue</button>
+                        <button data-metric="support" class="comparison-metric-button text-sm md:text-base px-4 py-2 rounded-md font-medium">Government Support</button>
+                        <button data-metric="swot" class="comparison-metric-button text-sm md:text-base px-4 py-2 rounded-md font-medium">SWOT Analysis</button>
+                    </div>
+
+                    <div id="comparison-content">
+                        <!-- Dynamic Content Loaded Here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Context Section -->
+            <section id="context" class="content-section">
+                <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm">
+                    <h2 class="text-2xl font-bold mb-2 text-center text-[#739072]">Why Moradabad? The Strategic Advantage</h2>
+                    <p class="text-center mb-8 text-gray-700">The viability of any industrial project is deeply tied to its location. This section explores the key environmental factors—the local economy, raw material availability, and government policy—that make Moradabad a prime location for a green B2B manufacturing venture.</p>
+
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="p-6 bg-gray-50 rounded-lg">
+                            <h3 class="font-bold text-xl mb-3">Industrial & Economic Profile</h3>
+                            <p class="text-gray-600 mb-4">While known as "Brass City," Moradabad's economy has a strong agricultural backbone. This creates a unique synergy: an experienced manufacturing workforce and abundant organic resources.</p>
+                             <div class="chart-container h-64">
+                                <canvas id="employmentChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6 bg-gray-50 rounded-lg">
+                            <h3 class="font-bold text-xl mb-3">Raw Material Supply Chain</h3>
+                            <p class="text-gray-600 mb-4">The region is rich in the exact feedstocks needed for green manufacturing, minimizing transport costs and ensuring supply stability. This creates a powerful circular economy opportunity.</p>
+                            <div class="mt-6 space-y-4">
+                                <div class="flex items-center">
+                                    <span class="text-2xl mr-4">🌾</span>
+                                    <div>
+                                        <h4 class="font-semibold">Agricultural Waste</h4>
+                                        <p class="text-sm text-gray-500">156M tonnes/year in UP</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="text-2xl mr-4">🐄</span>
+                                    <div>
+                                        <h4 class="font-semibold">Cattle Dung</h4>
+                                        <p class="text-sm text-gray-500">~692k tonnes/day in UP</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="text-2xl mr-4">🏭</span>
+                                    <div>
+                                        <h4 class="font-semibold">Sugar Mill Press Mud</h4>
+                                        <p class="text-sm text-gray-500">Abundant from 119 mills in UP</p>
+                                    </div>
+                                </div>
+                                 <div class="flex items-center">
+                                    <span class="text-2xl mr-4">🎋</span>
+                                    <div>
+                                        <h4 class="font-semibold">Sugarcane Bagasse</h4>
+                                        <p class="text-sm text-gray-500">Key input for biodegradable products</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-6 bg-gray-50 rounded-lg">
+                            <h3 class="font-bold text-xl mb-3">Government Incentives</h3>
+                            <p class="text-gray-600 mb-4">Uttar Pradesh offers one of India's most attractive policy frameworks for new industries, with a focus on MSMEs and renewable energy. The Nivesh Mitra portal simplifies access.</p>
+                             <ul class="space-y-3 mt-4 text-gray-700">
+                                <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✓</span><div><strong class="font-semibold">Capital Subsidy:</strong> Up to 20% for MSMEs in the region.</div></li>
+                                <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✓</span><div><strong class="font-semibold">Interest Subsidy:</strong> 50-60% on term loans for micro units.</div></li>
+                                <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✓</span><div><strong class="font-semibold">Tax/Duty Exemptions:</strong> 100% on stamp and electricity duty for 10 years for bio-energy.</div></li>
+                                <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✓</span><div><strong class="font-semibold">Streamlined Approvals:</strong> Single-window clearance via Nivesh Mitra portal.</div></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Plan Section -->
+            <section id="plan" class="content-section">
+                <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm">
+                    <h2 class="text-2xl font-bold mb-2 text-center text-[#739072]">Action Plan: Establishing a CBG Plant</h2>
+                    <p class="text-center mb-8 max-w-3xl mx-auto text-gray-700">Following the recommendation, this section outlines a clear, step-by-step implementation plan for setting up a small-scale (2-5 TPD) Compressed Biogas plant. This structured approach helps navigate the process from initial study to full-scale operation.</p>
+                    
+                    <div class="relative mt-8">
+                        <div class="absolute left-1/2 -translate-x-1/2 w-0.5 h-full bg-gray-200" aria-hidden="true"></div>
+                        <div class="space-y-12 relative">
+                            <!-- Step 1 -->
+                            <div class="flex items-center w-full">
+                                <div class="w-1/2 pr-8 text-right">
+                                    <div class="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
+                                        <h3 class="font-bold text-[#E08E6D]">Step 1: Detailed Feasibility & Planning</h3>
+                                        <p class="text-sm text-gray-600">Conduct granular study of local feedstock, finalize site, and create a detailed project report (DPR).</p>
+                                    </div>
+                                </div>
+                                <div class="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[#E08E6D] text-white flex items-center justify-center font-bold">1</div>
+                                <div class="w-1/2"></div>
+                            </div>
+                            <!-- Step 2 -->
+                            <div class="flex items-center w-full">
+                                <div class="w-1/2"></div>
+                                <div class="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[#E08E6D] text-white flex items-center justify-center font-bold">2</div>
+                                <div class="w-1/2 pl-8">
+                                    <div class="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
+                                        <h3 class="font-bold text-[#E08E6D]">Step 2: Registration & Approvals</h3>
+                                        <p class="text-sm text-gray-600">Register as an MSME. Use the Nivesh Mitra portal to apply for all necessary licenses (PCB, Fire, Safety etc.).</p>
+                                    </div>
+                                </div>
+                            </div>
+                             <!-- Step 3 -->
+                            <div class="flex items-center w-full">
+                                <div class="w-1/2 pr-8 text-right">
+                                    <div class="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
+                                        <h3 class="font-bold text-[#E08E6D]">Step 3: Land & Funding</h3>
+                                        <p class="text-sm text-gray-600">Acquire 1-2 acres of land. Secure funding via bank loans (SBI, SIDBI) and apply for government capital subsidies.</p>
+                                    </div>
+                                </div>
+                                <div class="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[#E08E6D] text-white flex items-center justify-center font-bold">3</div>
+                                <div class="w-1/2"></div>
+                            </div>
+                             <!-- Step 4 -->
+                            <div class="flex items-center w-full">
+                                <div class="w-1/2"></div>
+                                <div class="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[#E08E6D] text-white flex items-center justify-center font-bold">4</div>
+                                <div class="w-1/2 pl-8">
+                                    <div class="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
+                                        <h3 class="font-bold text-[#E08E6D]">Step 4: Construction & Procurement</h3>
+                                        <p class="text-sm text-gray-600">Finalize plant design, procure machinery (digesters, purification units), and begin civil construction.</p>
+                                    </div>
+                                </div>
+                            </div>
+                             <!-- Step 5 -->
+                            <div class="flex items-center w-full">
+                                <div class="w-1/2 pr-8 text-right">
+                                    <div class="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
+                                        <h3 class="font-bold text-[#E08E6D]">Step 5: Supply Chain & Market Linkage</h3>
+                                        <p class="text-sm text-gray-600">Sign contracts with feedstock suppliers. Secure LOI and off-take agreements with OMCs under SATAT scheme.</p>
+                                    </div>
+                                </div>
+                                <div class="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[#E08E6D] text-white flex items-center justify-center font-bold">5</div>
+                                <div class="w-1/2"></div>
+                            </div>
+                            <!-- Step 6 -->
+                            <div class="flex items-center w-full">
+                                <div class="w-1/2"></div>
+                                <div class="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[#E08E6D] text-white flex items-center justify-center font-bold">6</div>
+                                <div class="w-1/2 pl-8">
+                                    <div class="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
+                                        <h3 class="font-bold text-[#E08E6D]">Step 6: Production & Optimization</h3>
+                                        <p class="text-sm text-gray-600">Commission the plant, begin production, and continuously monitor operations for efficiency and quality control.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const app = {
+            state: {
+                activeNav: 'overview',
+                activeComparisonOption: 'cbg',
+                activeComparisonMetric: 'investment',
+            },
+            elements: {
+                navButtons: document.querySelectorAll('.nav-button'),
+                contentSections: document.querySelectorAll('.content-section'),
+                comparisonOptionButtons: document.querySelectorAll('.comparison-button'),
+                comparisonMetricButtons: document.querySelectorAll('.comparison-metric-button'),
+                comparisonContent: document.getElementById('comparison-content'),
+                cbgButton: document.getElementById('selectCBG'),
+                bioButton: document.getElementById('selectBio'),
+            },
+            charts: {},
+            data: {
+                employment: {
+                    labels: ['Manufacturing', 'Primary Metal', 'Other'],
+                    data: [40.09, 12.37, 47.54],
+                },
+                cbg: {
+                    investment: {
+                        labels: ['Land & Civil', 'Plant & Machinery', 'Digester/Purification', 'Storage/Compression', 'Working Capital & Misc'],
+                        data: [1.00, 1.50, 1.00, 0.50, 1.00], // In Crore
+                        title: "CBG Plant Investment (Total: ₹5 Cr)"
+                    },
+                    revenue: {
+                        labels: ['CBG Sales', 'Fertilizer Sales'],
+                        data: [3.5, 1.0], // In Crore (Annual)
+                        title: "CBG Annual Revenue (Est: ₹4.5 Cr)",
+                        metrics: {
+                            "Profitability": "High, due to dual revenue and low production cost (₹40-42/kg vs sale price of ₹70-78/kg).",
+                            "Payback Period": "Relatively long (4-6 years), but de-risked by subsidies."
+                        }
+                    },
+                    support: {
+                        title: "Key Government Support for CBG",
+                        items: [
+                            { name: "Capital Subsidy (Central)", value: "Up to ₹4 Cr per 4800 kg/day capacity." },
+                            { name: "Production Subsidy (UP)", value: "₹75 lakh per ton (max ₹20 Cr)." },
+                            { name: "Guaranteed Off-take", value: "Mandatory purchase by Oil Marketing Companies (OMCs) under SATAT scheme." },
+                            { name: "Tax & Duty Exemption", value: "100% on Stamp Duty and Electricity Duty for 10 years." }
+                        ]
+                    },
+                    swot: {
+                        strengths: ["Guaranteed market (OMCs)", "Dual revenue streams", "Abundant local feedstock"],
+                        weaknesses: ["Feedstock aggregation can be complex", "Longer payback period", "Technical expertise required"],
+                        opportunities: ["Govt. blending mandates", "Growing demand for clean fuel", "Circular economy model"],
+                        threats: ["Policy changes", "Fluctuating feedstock prices", "Logistical challenges"]
+                    }
+                },
+                bio: {
+                    investment: {
+                        labels: ['Machinery (Pulping, Molding, etc.)', 'Land & Civil', 'Working Capital', 'Certifications & Misc'],
+                        data: [2.5, 1.0, 1.0, 0.5], // In Crore
+                        title: "Biodegradable Packaging Investment (Total: ₹5 Cr)"
+                    },
+                    revenue: {
+                        labels: ['Domestic Sales', 'Export Sales'],
+                        data: [2.5, 1.5], // In Crore (Annual)
+                        title: "Biodegradable Packaging Revenue (Est: ₹4 Cr)",
+                         metrics: {
+                            "Profitability": "Good profit margins (35-55%), but dependent on marketing and scale.",
+                            "Payback Period": "Faster (2-3 years) for well-run, medium-scale units."
+                        }
+                    },
+                    support: {
+                        title: "Key Government Support for Packaging",
+                        items: [
+                            { name: "Capital Subsidy (UP MSME)", value: "15-20% for small/micro units (max ₹4 Cr)." },
+                            { name: "Interest Subsidy (UP MSME)", value: "50-60% on term loans for micro units." },
+                            { name: "Stamp Duty Exemption", value: "75% in the region (100% for women entrepreneurs)." },
+                            { name: "Quality/Tech Support", value: "Reimbursement for certifications (ZED, ISO) and ERP." }
+                        ]
+                    },
+                    swot: {
+                        strengths: ["Rapidly growing market", "Lower initial investment for some scales", "Strong export potential"],
+                        weaknesses: ["High competition from plastics", "Higher product cost for consumers", "Raw material price fluctuations"],
+                        opportunities: ["Strict plastic ban enforcement", "Rising consumer awareness", "New bio-polymers and tech"],
+                        threats: ["Competition from large players", "Need for continuous marketing", "Changes in import/export policies"]
+                    }
+                }
+            },
+
+            init() {
+                this.setupNav();
+                this.setupComparisonControls();
+                this.renderEmploymentChart();
+                this.updateComparisonView();
+            },
+
+            setupNav() {
+                this.elements.navButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        this.state.activeNav = button.dataset.target;
+                        this.updateNavView();
+                    });
+                });
+            },
+
+            updateNavView() {
+                this.elements.navButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.target === this.state.activeNav);
+                });
+                this.elements.contentSections.forEach(section => {
+                    section.classList.toggle('active', section.id === this.state.activeNav);
+                });
+            },
+            
+            setupComparisonControls() {
+                this.elements.comparisonOptionButtons.forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        this.state.activeComparisonOption = e.currentTarget.id === 'selectCBG' ? 'cbg' : 'bio';
+                        this.elements.comparisonOptionButtons.forEach(btn => btn.classList.remove('active'));
+                        e.currentTarget.classList.add('active');
+                        this.updateComparisonView();
+                    });
+                });
+                
+                this.elements.comparisonMetricButtons.forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        this.state.activeComparisonMetric = e.currentTarget.dataset.metric;
+                         this.elements.comparisonMetricButtons.forEach(btn => btn.classList.remove('active'));
+                        e.currentTarget.classList.add('active');
+                        this.updateComparisonView();
+                    });
+                });
+            },
+            
+            updateComparisonView() {
+                const optionData = this.data[this.state.activeComparisonOption];
+                const metric = this.state.activeComparisonMetric;
+                let html = '';
+
+                switch(metric) {
+                    case 'investment':
+                        html = `
+                            <h3 class="text-xl font-bold text-center mb-4">${optionData.investment.title}</h3>
+                            <div class="chart-container">
+                                <canvas id="comparisonChart"></canvas>
+                            </div>`;
+                        this.elements.comparisonContent.innerHTML = html;
+                        this.renderComparisonChart(optionData.investment.labels, optionData.investment.data, 'bar');
+                        break;
+                    case 'revenue':
+                         html = `
+                            <h3 class="text-xl font-bold text-center mb-4">${optionData.revenue.title}</h3>
+                            <div class="grid md:grid-cols-2 gap-6 items-center">
+                                <div class="chart-container h-64 md:h-auto">
+                                    <canvas id="comparisonChart"></canvas>
+                                </div>
+                                <div class="space-y-4 text-gray-700">
+                                    <div>
+                                        <h4 class="font-semibold text-[#3C3633]">Profitability</h4>
+                                        <p>${optionData.revenue.metrics.Profitability}</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-[#3C3633]">Payback Period</h4>
+                                        <p>${optionData.revenue.metrics["Payback Period"]}</p>
+                                    </div>
+                                </div>
+                            </div>`;
+                        this.elements.comparisonContent.innerHTML = html;
+                        this.renderComparisonChart(optionData.revenue.labels, optionData.revenue.data, 'doughnut');
+                        break;
+                    case 'support':
+                        html = `
+                            <h3 class="text-xl font-bold text-center mb-4">${optionData.support.title}</h3>
+                            <div class="space-y-3 max-w-2xl mx-auto">
+                                ${optionData.support.items.map(item => `
+                                    <div class="bg-green-50 p-4 rounded-lg flex justify-between items-center">
+                                        <span class="font-semibold text-green-800">${item.name}</span>
+                                        <span class="text-right text-green-700">${item.value}</span>
+                                    </div>
+                                `).join('')}
+                            </div>`;
+                        this.elements.comparisonContent.innerHTML = html;
+                        break;
+                    case 'swot':
+                        const swotData = optionData.swot;
+                        html = `
+                            <h3 class="text-xl font-bold text-center mb-4">SWOT Analysis</h3>
+                            <div class="swot-grid">
+                                <div class="swot-item bg-green-100 border border-green-200">
+                                    <h4 class="font-bold text-green-800 mb-2">Strengths</h4>
+                                    <ul class="list-disc list-inside text-sm text-green-700 space-y-1">${swotData.strengths.map(s => `<li>${s}</li>`).join('')}</ul>
+                                </div>
+                                <div class="swot-item bg-red-100 border border-red-200">
+                                    <h4 class="font-bold text-red-800 mb-2">Weaknesses</h4>
+                                    <ul class="list-disc list-inside text-sm text-red-700 space-y-1">${swotData.weaknesses.map(w => `<li>${w}</li>`).join('')}</ul>
+                                </div>
+                                <div class="swot-item bg-blue-100 border border-blue-200">
+                                    <h4 class="font-bold text-blue-800 mb-2">Opportunities</h4>
+                                    <ul class="list-disc list-inside text-sm text-blue-700 space-y-1">${swotData.opportunities.map(o => `<li>${o}</li>`).join('')}</ul>
+                                </div>
+                                <div class="swot-item bg-yellow-100 border border-yellow-200">
+                                    <h4 class="font-bold text-yellow-800 mb-2">Threats</h4>
+                                    <ul class="list-disc list-inside text-sm text-yellow-700 space-y-1">${swotData.threats.map(t => `<li>${t}</li>`).join('')}</ul>
+                                </div>
+                            </div>`;
+                        this.elements.comparisonContent.innerHTML = html;
+                        break;
+                }
+            },
+
+            renderComparisonChart(labels, data, type) {
+                const ctx = document.getElementById('comparisonChart').getContext('2d');
+                if (this.charts.comparison) {
+                    this.charts.comparison.destroy();
+                }
+
+                const backgroundColors = type === 'bar' 
+                    ? ['#739072', '#a3b8a2', '#d3e2d2', '#E08E6D', '#eec3b3'] 
+                    : ['#739072', '#E08E6D', '#a3b8a2', '#eec3b3'];
+
+                this.charts.comparison = new Chart(ctx, {
+                    type: type,
+                    data: {
+                        labels: labels.map(l => l.length > 16 ? l.match(/.{1,16}/g) : l), // Wrap long labels
+                        datasets: [{
+                            label: 'Cost in ₹ Crore',
+                            data: data,
+                            backgroundColor: backgroundColors,
+                            borderColor: '#FDFBF6',
+                            borderWidth: type === 'doughnut' ? 4 : 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: type === 'doughnut' ? 'bottom' : 'none',
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += `₹${context.parsed.y} Cr`;
+                                        } else if (context.parsed !== null){
+                                            label += `₹${context.parsed} Cr`;
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: type === 'bar' ? {
+                            x: { ticks: { font: { size: 10 } } },
+                            y: { beginAtZero: true, title: { display: true, text: 'Cost (in ₹ Crore)' } }
+                        } : {}
+                    }
+                });
+            },
+            
+            renderEmploymentChart() {
+                const ctx = document.getElementById('employmentChart').getContext('2d');
+                this.charts.employment = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: this.data.employment.labels,
+                        datasets: [{
+                            label: '% of Workforce',
+                            data: this.data.employment.data,
+                            backgroundColor: ['#739072', '#E08E6D', '#a3b8a2'],
+                            borderRadius: 4,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: { display: false },
+                             title: { display: true, text: 'Moradabad Workforce Distribution (%)' }
+                        },
+                        scales: {
+                            x: { beginAtZero: true },
+                            y: { ticks: { font: { size: 12 } } }
+                        }
+                    }
+                });
+            }
+        };
+
+        app.init();
+    });
+    </script>
+</body>
+</html>
